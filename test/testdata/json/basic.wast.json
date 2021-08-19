@@ -1,0 +1,73 @@
+[
+  {
+    "name": "preramble",
+    "magic": [
+      0,
+      97,
+      115,
+      109
+    ],
+    "version": [
+      13,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "type",
+    "entries": [
+      {
+        "form": "func",
+        "params": [
+          "i32",
+          "i32"
+        ],
+        "returns": [
+          "i32"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "function",
+    "entries": [
+      0
+    ]
+  },
+  {
+    "name": "export",
+    "entries": [
+      {
+        "field_str": "addTwo",
+        "kind": "function",
+        "index": 0
+      }
+    ]
+  },
+  {
+    "name": "code",
+    "entries": [
+      {
+        "locals": [],
+        "code": [
+          {
+            "name": "local.get",
+            "immediates": "0"
+          },
+          {
+            "name": "local.get",
+            "immediates": "1"
+          },
+          {
+            "return_type": "i32",
+            "name": "add"
+          },
+          {
+            "name": "end"
+          }
+        ]
+      }
+    ]
+  }
+]
