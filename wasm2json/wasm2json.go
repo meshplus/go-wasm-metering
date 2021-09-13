@@ -1,7 +1,6 @@
 package wasm2json
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/meshplus/go-wasm-metering/tool"
@@ -25,7 +24,6 @@ func Wasm2Json(buf []byte) ([]tool.JSON, error) {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("%#v\n", header)
 		jsonObj := make(tool.JSON)
 		switch header.Name {
 		case "custom":
