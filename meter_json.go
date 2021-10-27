@@ -7,10 +7,12 @@ import (
 
 	"github.com/meshplus/go-wasm-metering/json2wasm"
 	"github.com/meshplus/go-wasm-metering/tool"
+	"github.com/sirupsen/logrus"
 )
 
 type Metering struct {
-	Opts Options
+	Opts   Options
+	Logger logrus.FieldLogger
 }
 
 var (
@@ -145,7 +147,13 @@ func (m *Metering) MeterJSON(module []tool.JSON) ([]tool.JSON, uint64, error) {
 				typ := typEntries[typeIndex]
 				cost := m.getCost(typ, m.Opts.CostTable["type"].(tool.JSON), DefaultCost)
 
-				entry, cost = m.meterCodeEntry(entry, m.Opts.CostTable["code"].(tool.JSON), m.Opts.MeterType, funcIndex, cost)
+				entry, cost, err := m.meterCodeEntry(entry, m.Opts.CostTable["code"].(tool.JSON), m.Opts.MeterType, funcIndex, cost)
+				m.Logger.WithFields(logrus.Fields{
+					"code": entry,
+				}).Debug("meter entry")
+				if err != nil {
+					return nil, 0, fmt.Errorf("meterCodeEntry error: %v", err)
+				}
 				gasCost += cost
 				entries[i] = entry
 			}
@@ -264,7 +272,7 @@ func (m *Metering) getCost(j interface{}, costTable tool.JSON, defaultCost uint6
 }
 
 // meterCodeEntry meters a single code entry (see tool.CodeBody).
-func (m *Metering) meterCodeEntry(entry tool.CodeBody, costTable tool.JSON, meterType string, meterFuncIndex int, cost uint64) (tool.CodeBody, uint64) {
+func (m *Metering) meterCodeEntry(entry tool.CodeBody, costTable tool.JSON, meterType string, meterFuncIndex int, cost uint64) (tool.CodeBody, uint64, error) {
 	getImmediateFromOP := func(name, opType string) string {
 		var immediatesKey string
 		if name == "const" {
@@ -381,6 +389,9 @@ func (m *Metering) meterCodeEntry(entry tool.CodeBody, costTable tool.JSON, mete
 			if _, exist := branchOps[op.Name]; exist {
 				break
 			}
+			if i >= len(code) {
+				return tool.CodeBody{}, 0, fmt.Errorf("illegal code(the lack of branch) : %v", code)
+			}
 		}
 
 		// add the metering statement.
@@ -398,5 +409,5 @@ func (m *Metering) meterCodeEntry(entry tool.CodeBody, costTable tool.JSON, mete
 	}
 
 	entry.Code = meteredCode
-	return entry, sum
+	return entry, sum, nil
 }
